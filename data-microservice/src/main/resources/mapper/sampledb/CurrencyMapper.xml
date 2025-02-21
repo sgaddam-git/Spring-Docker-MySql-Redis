@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sample.data.currency.mapper.sampledb.CurrencyMapper">
+    <cache type="org.redisson.mybatis.RedissonCache">
+        <property name="redissonConfig" value="redisson.yaml"/>
+    </cache>
+
+    <!-- readOnly = true otherwise getting Serialization errors, flush -> 24 hours, default eviction is LRU,
+        size = 4096 references to lists/objects -->
+    <cache readOnly="true" flushInterval="86400" eviction="FIFO" size="4096"/>
+
+    <select id="list" useCache="true">
+        SELECT ID,
+               NAME        as name,
+               CODE        as code,
+               CREATED_BY  as createdBy,
+               MODIFIED_BY as modifiedBy,
+               IS_DELETED  as deleted
+        from DBO_SAMPLE.REF_CURRENCY
+        WHERE IS_DELETED = 0
+    </select>
+    <insert id="insertCurrency" flushCache="true">
+        insert into DBO_SAMPLE.REF_CURRENCY
+        (NAME, CODE, CREATED_BY, CREATED_ON, MODIFIED_BY, MODIFIED_ON, IS_DELETED)
+        VALUES (#{name}, #{code}, #{createdBy}, NOW(), #{modifiedBy}, NOW(), 0)
+    </insert>
+
+    <update id="updateCurrency" flushCache="true">
+        update DBO_SAMPLE.REF_CURRENCY
+        SET NAME        = #{name},
+            CODE        = #{code},
+            MODIFIED_BY = #{modifiedBy},
+            MODIFIED_ON = NOW()
+        WHERE ID = #{id}
+    </update>
+
+    <update id="deleteCurrency" flushCache="true">
+        update DBO_SAMPLE.REF_CURRENCY
+        SET IS_DELETED  = 1,
+            MODIFIED_BY = #{modifiedBy},
+            MODIFIED_ON = NOW()
+        WHERE ID = #{id}
+    </update>
+
+</mapper>
