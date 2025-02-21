@@ -1,4 +1,4 @@
-# data-service With Mysql Redis cache
+# Data-microService With Mysql Redis cache
 
 This Repo 
 1. Creating containers for Mysql and Redis
